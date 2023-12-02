@@ -21,6 +21,7 @@ from dotenv import load_dotenv
 from PIL import Image, ImageDraw, ImageFont, ImageGrab
 import matplotlib.font_manager as fm
 from openai import OpenAI
+import pytesseract
 
 
 load_dotenv()
@@ -599,6 +600,39 @@ def convert_percent_to_decimal(percent_str):
         print(f"Error converting percent to decimal: {e}")
         return None
 
+def smart_screenshot_analysis(file_path='screenshot.png'):
+    """
+    Takes a screenshot of the current screen, analyzes its contents, and suggests actions.
+    Requires pytesseract and PIL.
+    """
+    # Capture the screenshot
+    capture_screen_with_cursor(file_path)
+
+    # Load the image
+    image = Image.open(file_path)
+
+    # Use pytesseract to do OCR on the image
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Update the path as per your Tesseract installation
+    text = pytesseract.image_to_string(image)
+
+    # Analyze the text and suggest actions
+    suggestions = analyze_text_and_suggest_actions(text)
+
+    return json.dumps(suggestions, indent=4)
+
+def analyze_text_and_suggest_actions(text):
+    """
+    Analyzes the text from the screenshot and suggests actions.
+    """
+    suggestions = {}
+    # Example analysis: Check for certain keywords and suggest related actions
+    if 'error' in text.lower():
+        suggestions['action'] = 'Search for a solution to the error online'
+    elif 'deadline' in text.lower():
+        suggestions['action'] = 'Set a reminder about the deadline'
+    # Add more conditions as per requirements
+
+    return suggestions
 
 def main_entry():
     parser = argparse.ArgumentParser(
